@@ -4,8 +4,9 @@ import os
 import discord
 import pygame
 from pygame.locals import *
-import mazehenerator
+import mazegenerator
 import random
+from dotenv import load_dotenv
 
 
 class Player:
@@ -57,14 +58,13 @@ async def on_message(message):
         await message.delete()
 
         kanal = message.channel
-        #size = random.randrange(3, )#//3
         size = 4
-        starts = (random.randrange(1, size*3-2), random.randrange(1, size*3 - 2))
+        starts = (random.randrange(1, size * 3 - 2), random.randrange(1, size * 3 - 2))
         cils = starts
         while cils == starts:
-            cils = (random.randrange(1, size*3-2), random.randrange(1, size*3 - 2))
+            cils = (random.randrange(1, size * 3 - 2), random.randrange(1, size * 3 - 2))
 
-        pole = mazehenerator.genmaze(size, starts)
+        pole = mazegenerator.genmaze(size, starts)
         pole[cils[1]][cils[0]] = 'C'
         print(pole)
         z = ""
@@ -108,33 +108,36 @@ def draw():
     for i, player in enumerate(players):
         x, y = player.pozice
         print(player.color)
-        pygame.draw.rect(screen, player.color, [x*sirkapolicka, y*sirkapolicka, sirkapolicka, sirkapolicka])
+        pygame.draw.rect(screen, player.color, [x * sirkapolicka, y * sirkapolicka, sirkapolicka, sirkapolicka])
         r = font1.render(str(player.name), True, player.color)
-        screen.blit(r, (width-250, i*sirkapolicka))
+        screen.blit(r, (width - 250, i * sirkapolicka))
         if (x, y) in plna:
-            plna[(x,y)] += 1
+            plna[(x, y)] += 1
             r = font1.render(str(plna[(x, y)]), True, 'black')
-            screen.blit(r, [x*sirkapolicka + sirkapolicka//2 - r.get_width()/2, y*sirkapolicka + sirkapolicka//2 - r.get_height()/2])
+            screen.blit(r, [x * sirkapolicka + sirkapolicka // 2 - r.get_width() / 2,
+                            y * sirkapolicka + sirkapolicka // 2 - r.get_height() / 2])
         else:
-            plna[(x,y)] = 1
+            plna[(x, y)] = 1
 
     for x in range(N):
         for y in range(M):
             if pole[y][x] == "S":
-                pygame.draw.rect(screen, 'lime', (x*sirkapolicka, y * sirkapolicka, sirkapolicka, sirkapolicka))
+                pygame.draw.rect(screen, 'lime', (x * sirkapolicka, y * sirkapolicka, sirkapolicka, sirkapolicka))
             if pole[y][x] == "C":
                 pygame.draw.rect(screen, 'red', (x * sirkapolicka, y * sirkapolicka, sirkapolicka, sirkapolicka))
             if pole[y][x] == '0':
                 pygame.draw.rect(screen, 'white', (x * sirkapolicka, y * sirkapolicka, sirkapolicka, sirkapolicka))
 
-    for y in range(1, M+1):
-        pygame.draw.line(screen, 'gray', (0, y*sirkapolicka), (N*sirkapolicka, y*sirkapolicka), 4)
-    for x in range(1, N+1):
-        pygame.draw.line(screen, 'gray', (x*sirkapolicka, 0), (x*sirkapolicka, M*sirkapolicka), 4)
+    for y in range(1, M + 1):
+        pygame.draw.line(screen, 'gray', (0, y * sirkapolicka), (N * sirkapolicka, y * sirkapolicka), 4)
+    for x in range(1, N + 1):
+        pygame.draw.line(screen, 'gray', (x * sirkapolicka, 0), (x * sirkapolicka, M * sirkapolicka), 4)
 
     pygame.display.update()
 
-colors = ['forestgreen', 'darkblue', 'maroon3', 'orangered', 'yellow', 'burlywood', 'lime', 'aqua', 'fuchsia', 'green', 'blue', 'forestgreen']
+
+colors = ['forestgreen', 'darkblue', 'maroon3', 'orangered', 'yellow', 'burlywood', 'lime', 'aqua', 'fuchsia', 'green',
+          'blue', 'forestgreen']
 colori = 0
 pygame.init()
 width, height = 1000, 1000
@@ -148,7 +151,8 @@ players = []
 kanal = -1
 pole = []
 
-from dotenv import load_dotenv
+
+
 load_dotenv()
 TOKEN = os.getenv('TOKEN')
 
