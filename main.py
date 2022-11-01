@@ -5,6 +5,7 @@ import discord
 import pygame
 from pygame.locals import *
 import mazehenerator
+import random
 
 
 class Player:
@@ -13,7 +14,7 @@ class Player:
         self.id = id
         self.name = str(name)[:str(name).index("#")]
         self.lastmessage = -1
-        self.pozice = start  # TODO
+        self.pozice = start
         self.color = colors[colori]
         colori += 1
 
@@ -31,8 +32,7 @@ def vyhodnotpohyby():
         if p.lastmessage == "s":    newpozice = (p.pozice[0], p.pozice[1] + 1)
         if p.lastmessage == "d":    newpozice = (p.pozice[0] + 1, p.pozice[1])
         print(newpozice)
-        print(pole[newpozice[1]][newpozice[0]])
-        if pole[newpozice[1]][newpozice[0]] in [1, "S", "C"]:
+        if pole[newpozice[1]][newpozice[0]] in ['1', "S", "C"]:
             p.pozice = newpozice
             p.lastmessage = "-1"
 
@@ -43,25 +43,30 @@ client = discord.Client(intents=discord.Intents.all())
 @client.event
 async def on_message(message):
     global kanal, pole, playerid, players, N, M, starts, colori
-    if message.author == client.user: return
-
+    if message.author == client.user and message.content != "!tick": return
+    print(f"{message.author} napsal: {message.content}")
     id = message.author.id
     if id in playerid and message.content != "!tick":
         players[playerid.index(id)].lastmessage = message.content
 
     if message.content.startswith("!startgame"):
+        await message.channel.send("!netickej")
         players = []
         playerid = []
         colori = 0
         await message.delete()
 
         kanal = message.channel
-        N = 8
-        M = 7
+        #size = random.randrange(3, )#//3
+        size = 4
+        starts = (random.randrange(1, size*3-2), random.randrange(1, size*3 - 2))
+        cils = starts
+        while cils == starts:
+            cils = (random.randrange(1, size*3-2), random.randrange(1, size*3 - 2))
 
-        starts = (2,2)
-        #pole = mazehenerator.genmaze(N, M, starts)
-        pole = [[0,0,0,0,0,0,0,0],[0,1,1,1,1,1,1,0],[0,1,'S',1,1,0,1,0],[0,1,1,0,1,1,1,0],[0,1,1,1,0,"C",1,0],[0,1,1,1,1,1,1,0],[0,0,0,0,0,0,0,0]]
+        pole = mazehenerator.genmaze(size, starts)
+        pole[cils[1]][cils[0]] = 'C'
+        print(pole)
         z = ""
 
         for i in pole:
@@ -70,8 +75,9 @@ async def on_message(message):
             z += '\n'
         await message.channel.send("!start 1")
         await asyncio.sleep(5)
-        await message.channel.send(f"!zadani {N} {M}")
+        await message.channel.send(f"!zadani {size} {size}")
         await message.channel.send(f"!zadani {z}")
+        await message.channel.send("!zacnitickat")
 
     if message.content.startswith('!login'):
         id = message.author.id
@@ -80,6 +86,9 @@ async def on_message(message):
             players.append(Player(id, message.author, starts))
 
     if message.content.startswith('!tick'):
+        await message.delete()
+        if all([p.lastmessage == -1 for p in players]):
+            await message.channel.send("!netickej")
         vyhodnotpohyby()
         draw()
         await kanal.send(list(map(str, players)))
@@ -89,9 +98,11 @@ async def on_message(message):
 
 def draw():
     global players, width, height, N, M, pole
+    N = len(pole)
+    M = len(pole)
+
     screen.fill('black')
-    sirkapolicka = min(width - 250, height) / max(N, M)
-    print(sirkapolicka)
+    sirkapolicka = min(width - 250, height) / N
 
     plna = {}
     for i, player in enumerate(players):
@@ -113,9 +124,8 @@ def draw():
                 pygame.draw.rect(screen, 'lime', (x*sirkapolicka, y * sirkapolicka, sirkapolicka, sirkapolicka))
             if pole[y][x] == "C":
                 pygame.draw.rect(screen, 'red', (x * sirkapolicka, y * sirkapolicka, sirkapolicka, sirkapolicka))
-            if pole[y][x] == 0:
+            if pole[y][x] == '0':
                 pygame.draw.rect(screen, 'white', (x * sirkapolicka, y * sirkapolicka, sirkapolicka, sirkapolicka))
-
 
     for y in range(1, M+1):
         pygame.draw.line(screen, 'gray', (0, y*sirkapolicka), (N*sirkapolicka, y*sirkapolicka), 4)
@@ -123,7 +133,6 @@ def draw():
         pygame.draw.line(screen, 'gray', (x*sirkapolicka, 0), (x*sirkapolicka, M*sirkapolicka), 4)
 
     pygame.display.update()
-    draw()
 
 colors = ['forestgreen', 'darkblue', 'maroon3', 'orangered', 'yellow', 'burlywood', 'lime', 'aqua', 'fuchsia', 'green', 'blue', 'forestgreen']
 colori = 0
