@@ -85,10 +85,10 @@ async def on_message(message):
             playerid.append(id)
             players.append(Player(id, message.author, starts))
 
-    if message.content.startswith('!tick'):
+    if message.content.startswith('!ODUxOTM3NzY2NTU5NDQ5MTI4.G15jCL.VGXxwbeNpjUWU03tesCTuZ4_fn7Q7gppzEK4gMtick'):
         await message.delete()
-        if all([p.lastmessage == -1 for p in players]):
-            await message.channel.send("!netickej")
+        #f all([p.lastmessage == -1 for p in players]):
+        #    await message.channel.send("!netickej")
         vyhodnotpohyby()
         draw()
         await kanal.send(list(map(str, players)))

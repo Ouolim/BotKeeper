@@ -1,20 +1,28 @@
 import discord
 import asyncio
 
-TOKEN="OTcxNjcyNDcyMTAzNTU1MDky.Gj_e36.dNJyjlgbjiNnZEM2uRQ12btOaHa6PjRvst4Ijs"
 client = discord.Client(intents=discord.Intents.all())
 
 @client.event
 async def on_message(message):
     global tickani
-    print(tickani)
+    print(f"{message.author} napsal {message.content}")
     if message.content.startswith("!zacnitickat"):
+        print("zapinam tickani")
         await message.delete()
         tickani = True
         while tickani:
             await asyncio.sleep(5)
             await message.channel.send("!tick")
     if message.content.startswith("!netickej"):
+        print("Vypinam tickani")
         tickani = False
 tickani = False
-client.run('ODUxOTM3NzY2NTU5NDQ5MTI4.Gmjy45.IMswLND9iZnrsTXql1xQoZTvLPYdf2ClEY9b9I')
+
+
+from dotenv import load_dotenv
+import os
+load_dotenv()
+TOKEN = os.getenv('TOKENTIKATOR')
+
+client.run('ODUxOTM3NzY2NTU5NDQ5MTI4.G15jCL.VGXxwbeNpjUWU03tesCTuZ4_fn7Q7gppzEK4gM')
